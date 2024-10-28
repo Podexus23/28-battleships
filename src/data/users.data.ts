@@ -3,18 +3,22 @@ import { LoginUser, LoginUserAnswer } from "../interface/msgFrom.interface";
 
 let counter = 0;
 
-export const allUsersData: {
+interface User {
   id: string;
   ws: WebSocket;
   data?: LoginUser["data"];
-}[] = [];
+  isPlaying: boolean;
+}
+
+const allUsersData: User[] = [];
 
 export function createUser(ws: WebSocket) {
   const userModel = {
     id: `user-${(counter += 1)}`,
     ws,
+    isPlaying: false,
   };
-  console.log(`User ${userModel.id}, created`);
+  console.log(`User ${userModel.id}, connected`);
   allUsersData.push(userModel);
   return userModel.id;
 }
@@ -30,6 +34,8 @@ export function updateUser(
       name: newData.name,
       password: newData.password,
     };
+    console.log(`${user.id} data updated`);
+
     return {
       name: user.data.name,
       index: user.id,
@@ -39,4 +45,8 @@ export function updateUser(
   } catch (error) {
     if (error instanceof Error) console.error(error.message);
   }
+}
+
+export function getUser(userID: string): User | undefined {
+  return allUsersData.find((user) => user.id === userID);
 }

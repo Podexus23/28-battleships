@@ -5,7 +5,8 @@ import { LoginUser } from "./interface/msgFrom.interface";
 import { createUser, updateUser } from "./data/users.data";
 import { RawData, WebSocketServer, WebSocket } from "ws";
 import { createRoom, sendRooms } from "./data/rooms.data";
-import { sendRegData } from "./data/send.data";
+import { addUserToRoom, sendRegData } from "./data/send.data";
+import { createGame } from "./data/games.data";
 
 const HTTP_PORT = 8181;
 const WS_PORT = 3000;
@@ -42,7 +43,8 @@ wss.on("connection", (ws) => {
       );
     }
     if (msgData?.type === MessageGetType.CreateRoom) {
-      createRoom();
+      let roomIndex = createRoom() as string;
+      addUserToRoom(roomIndex as string, userID);
       const dataToSend = {
         type: MessageSendType.UpdateRoomsAndUsersData,
         data: JSON.stringify(sendRooms()),
@@ -52,7 +54,10 @@ wss.on("connection", (ws) => {
       ws.send(JSON.stringify(dataToSend));
     }
     if (msgData?.type === MessageGetType.AddUserToRoom) {
-      createRoom();
+      if (msgData.data.indexRoom) {
+        addUserToRoom(msgData.data.indexRoom as string, userID);
+        createGame(msgData.data.indexRoom as string);
+      }
       const dataToSend = {
         type: MessageSendType.UpdateRoomsAndUsersData,
         data: JSON.stringify(sendRooms()),

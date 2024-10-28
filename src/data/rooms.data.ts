@@ -1,17 +1,22 @@
+import { UserRoomInfo } from "../interface/msgFrom.interface";
+
 let counter = 0;
 
-export const allRoomsData: {
+interface Room {
   roomId: string | number;
   roomUsers: ({ name: string; index: number | string } | undefined)[];
-}[] = [];
+}
 
-export function createRoom() {
+const allRoomsData: Room[] = [];
+
+export function createRoom(): Room["roomId"] {
   const roomId = `room-${(counter += 1)}`;
   const dataToSave = {
     roomId,
-    roomUsers: [] as ({ name: string; index: number | string } | undefined)[],
+    roomUsers: [] as (UserRoomInfo | undefined)[],
   };
   allRoomsData.push(dataToSave);
+  return roomId;
   console.log(`Room ${roomId}, created`);
 }
 
@@ -21,4 +26,6 @@ export function sendRooms() {
   });
 }
 
-export function addUserToRoom() {}
+export function getRoom(roomId: string): Room | undefined {
+  return allRoomsData.find((room) => room.roomId === roomId);
+}
