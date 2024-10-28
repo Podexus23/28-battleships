@@ -1,14 +1,11 @@
 import { WebSocket } from "ws";
-import { LoginUser, LoginUserAnswer } from "../interface/msgFrom.interface";
+import {
+  LoginUser,
+  LoginUserAnswer,
+  User,
+} from "../interface/msgFrom.interface";
 
 let counter = 0;
-
-interface User {
-  id: string;
-  ws: WebSocket;
-  data?: LoginUser["data"];
-  isPlaying: boolean;
-}
 
 const allUsersData: User[] = [];
 
@@ -49,4 +46,8 @@ export function updateUser(
 
 export function getUser(userID: string): User | undefined {
   return allUsersData.find((user) => user.id === userID);
+}
+
+export function sendAllUserData() {
+  return allUsersData;
 }

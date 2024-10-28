@@ -16,8 +16,8 @@ export function createRoom(): Room["roomId"] {
     roomUsers: [] as (UserRoomInfo | undefined)[],
   };
   allRoomsData.push(dataToSave);
-  return roomId;
   console.log(`Room ${roomId}, created`);
+  return roomId;
 }
 
 export function sendRooms() {
