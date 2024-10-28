@@ -14,6 +14,7 @@ interface Game {
     };
   };
   isReady: number;
+  gameTurn: string | number;
 }
 
 const allGamesData: Game[] = [];
@@ -39,6 +40,7 @@ export function createGame(roomId: string) {
         },
       },
       isReady: 0,
+      gameTurn: player1?.id as string,
     };
     allGamesData.push(game);
     const dataToSend1 = {
@@ -54,6 +56,31 @@ export function createGame(roomId: string) {
     player1?.ws.send(JSON.stringify(dataToSend1));
     player2?.ws.send(JSON.stringify(dataToSend2));
   }
+}
+
+export function sendTurn(game: Game) {
+  if (!game) return;
+  let players = Object.keys(game.players);
+  let player1 = getUser(players[0]);
+  let player2 = getUser(players[1]);
+
+  const dataToSend1 = {
+    type: MessageSendType.ChangeTurn,
+    data: JSON.stringify({
+      currentPlayer: game.gameTurn,
+    }),
+    id: 0,
+  };
+  const dataToSend2 = {
+    type: MessageSendType.ChangeTurn,
+    data: JSON.stringify({
+      currentPlayer: game.gameTurn,
+    }),
+    id: 0,
+  };
+  player1?.ws.send(JSON.stringify(dataToSend1));
+  player2?.ws.send(JSON.stringify(dataToSend2));
+  game.gameTurn = player2?.id as string;
 }
 
 export function startGame(game: Game) {
@@ -80,6 +107,7 @@ export function startGame(game: Game) {
   };
   player1?.ws.send(JSON.stringify(dataToSend1));
   player2?.ws.send(JSON.stringify(dataToSend2));
+  sendTurn(game);
 }
 
 export function addShips(data: string) {
