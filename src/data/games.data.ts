@@ -58,6 +58,18 @@ export function createGame(roomId: string) {
   }
 }
 
+export function changeTurn(game: Game) {
+  if (!game) return;
+  let players = Object.keys(game.players);
+  let player1 = getUser(players[0]);
+  let player2 = getUser(players[1]);
+
+  game.gameTurn =
+    game.gameTurn === player1?.id
+      ? (player2?.id as string)
+      : (player1?.id as string);
+}
+
 export function sendTurn(game: Game) {
   if (!game) return;
   let players = Object.keys(game.players);
@@ -80,7 +92,6 @@ export function sendTurn(game: Game) {
   };
   player1?.ws.send(JSON.stringify(dataToSend1));
   player2?.ws.send(JSON.stringify(dataToSend2));
-  game.gameTurn = player2?.id as string;
 }
 
 export function startGame(game: Game) {
