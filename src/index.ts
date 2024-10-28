@@ -2,25 +2,13 @@ import { httpServer } from "./http_server/index";
 import { parseMessage, stringifyMessage } from "./helpers/message.helpers";
 import { MessageGetType, MessageSendType } from "./interface/types.interface";
 import { LoginUser } from "./interface/msgFrom.interface";
-import { createUser } from "./data/users.data";
+import { createUser, updateUser } from "./data/users.data";
 import { RawData, WebSocketServer, WebSocket } from "ws";
 import { createRoom, sendRooms } from "./data/rooms.data";
+import { sendRegData } from "./data/send.data";
 
 const HTTP_PORT = 8181;
 const WS_PORT = 3000;
-
-function sendRegData(data: LoginUser["data"], socket: WebSocket) {
-  const user = createUser(data, socket);
-
-  const dataToReg = {
-    type: MessageSendType.Registration,
-    data: "",
-    id: 0,
-  };
-
-  const dataToSend = stringifyMessage(user, dataToReg);
-  if (dataToSend) socket.send(dataToSend);
-}
 
 //open room?
 const wss = new WebSocketServer({ port: WS_PORT });
@@ -29,12 +17,15 @@ console.log(`Start static http server on the ${HTTP_PORT} port!`);
 
 wss.on("connection", (ws) => {
   console.log(`connected`);
+  let userID = createUser(ws);
 
   ws.on("message", (message: RawData) => {
     const msgData = parseMessage(message);
 
-    if (msgData?.type === "reg" && msgData.data) {
-      sendRegData(msgData.data, ws);
+    if (msgData?.type === MessageSendType.Registration && msgData.data) {
+      console.log(`${userID} send message`);
+      const userData = updateUser(msgData.data, userID);
+      if (userData) sendRegData(userData, ws);
       ws.send(
         JSON.stringify({
           type: MessageSendType.UpdateRoomsAndUsersData,

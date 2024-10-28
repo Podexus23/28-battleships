@@ -3,33 +3,40 @@ import { LoginUser, LoginUserAnswer } from "../interface/msgFrom.interface";
 
 let counter = 0;
 
-export const allUsersData = new Map<
-  WebSocket,
-  { ws: WebSocket; name?: string; password?: string }
->();
+export const allUsersData: {
+  id: string;
+  ws: WebSocket;
+  data?: LoginUser["data"];
+}[] = [];
 
-export function createUser(
-  data: LoginUser["data"],
-  ws: WebSocket
-): LoginUserAnswer["data"] {
-  const id = `${data.name}-${(counter += 1)}`;
-  const dataToSave = {
+export function createUser(ws: WebSocket) {
+  const userModel = {
+    id: `user-${(counter += 1)}`,
     ws,
-    name: data.name,
-    password: data.password,
   };
-  allUsersData.set(ws, dataToSave);
-  console.log(`User ${id}, created`);
-  return {
-    name: dataToSave.name,
-    index: id,
-    error: false,
-    errorText: "No error",
-  };
+  console.log(`User ${userModel.id}, created`);
+  allUsersData.push(userModel);
+  return userModel.id;
 }
 
-export function showUsers() {
-  allUsersData.forEach((user) => {
-    console.log(user.name);
-  });
+export function updateUser(
+  newData: LoginUser["data"],
+  userId: string
+): LoginUserAnswer["data"] | undefined {
+  let user = allUsersData.find((user) => user.id === userId);
+  try {
+    if (!user) throw new Error("UpdateUser: unexpected error, no such user");
+    user.data = {
+      name: newData.name,
+      password: newData.password,
+    };
+    return {
+      name: user.data.name,
+      index: user.id,
+      error: false,
+      errorText: "No error",
+    };
+  } catch (error) {
+    if (error instanceof Error) console.error(error.message);
+  }
 }
